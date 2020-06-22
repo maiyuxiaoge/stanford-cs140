@@ -330,6 +330,17 @@ thread_foreach (thread_action_func *func, void *aux)
       func (t, aux);
     }
 }
+void blocked_thread_check (struct thread *t, void *aux UNUSED)
+{
+  if (t->status == THREAD_BLOCKED && t->ticks_blocked>0)
+  {
+    t->ticks_blocked--;
+    if (t->ticks_blocked == 0)
+    {
+      thread_unblock(t);
+    }
+  }
+}
 
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
@@ -463,7 +474,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-
+  t->ticks_blocked = 0;
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);
   intr_set_level (old_level);
