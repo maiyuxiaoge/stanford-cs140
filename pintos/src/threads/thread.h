@@ -92,7 +92,9 @@ struct thread
     int64_t ticks_blocked;
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-
+    int64_t base_priority;
+    struct list locks;
+    struct lock *lock_waiting;
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -140,4 +142,10 @@ int thread_get_load_avg (void);
 void thread_block(void);
 void blocked_thread_check (struct thread *t, void *aux UNUSED);
 bool thread_cmp_priority(const struct list_elem *a,const struct list_elem *b,void *aux);
+void thread_donate_priority(struct thread *);
+void thread_update_priority(struct thread *);
+void thread_hold_the_lock(struct lock *);
+/* Remove a lock. */
+void thread_remove_lock (struct lock *lock);
+
 #endif /* threads/thread.h */
